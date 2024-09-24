@@ -1,8 +1,7 @@
 package com.ecommerce.order.model;
 
-public enum OrderStatus {
+public enum InventoryStatus {
     CREATED,
-    PROCESSING,
-    SUCCESSFUL,
+    LOCKED,
     FAILED
 }
