@@ -24,12 +24,13 @@ message GetCartRequest {
 
 message GetCartResponse {
   bool error = 1;
-  repeated string cart = 2;
+  repeated CartItem cartItem = 2;
   bool message = 3;
 }
 
 message CartItem {
   string productId = 1;
   string variantId = 2;
-  string quantity = 3;
+  int32 quantity = 3;
+  double price = 4;
 }
