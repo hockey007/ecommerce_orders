@@ -5,7 +5,6 @@ import com.ecommerce.order.dto.OrderEvent;
 import com.ecommerce.order.model.Order;
 import com.ecommerce.order.model.OrderItem;
 import com.ecommerce.order.model.OrderStatus;
-import com.ecommerce.order.producer.KafkaProducer;
 import com.ecommerce.order.repository.OrderItemRepository;
 import com.ecommerce.order.repository.OrderRepository;
 import cart.CartProto;
@@ -37,7 +36,9 @@ public class OrderService {
     private OrderItemRepository orderItemRepository;
 
     @Autowired
-    private KafkaProducer kafkaProducer;
+    private KafkaTemplate<String, OrderEvent> kafkaTemplate;
+
+    private static final String ORDER_CREATED_TOPIC = "order-created";
 
     @Transactional
     public void placeOrder(String userId) {
@@ -72,8 +73,7 @@ public class OrderService {
         orderEvent.setOrderItems(savedOrderItems);
         orderEvent.setOrderStatus(OrderStatus.PROCESSING);
 
-        kafkaProducer.sendOrder(savedOrder.getId(), orderEvent);
-        
+        kafkaTemplate.send(ORDER_CREATED_TOPIC, orderEvent);
     }
 
 }
