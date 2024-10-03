@@ -1,15 +1,16 @@
 package com.ecommerce.order.service;
 
-import cart.CartServiceGrpc.CartServiceBlockingStub;
+import com.ecommerce.common.CartProduct;
+import com.ecommerce.common.CartServiceGrpc.CartServiceBlockingStub;
+import com.ecommerce.common.GetCartRequest;
+import com.ecommerce.common.GetCartResponse;
+import com.ecommerce.common.InventoryServiceGrpc.InventoryServiceBlockingStub;
 import com.ecommerce.order.dto.OrderEvent;
 import com.ecommerce.order.model.Order;
 import com.ecommerce.order.model.OrderItem;
 import com.ecommerce.order.model.OrderStatus;
 import com.ecommerce.order.repository.OrderItemRepository;
 import com.ecommerce.order.repository.OrderRepository;
-import cart.CartProto;
-import cart.CartProto.CartItem;
-import inventory.InventoryServiceGrpc.InventoryServiceBlockingStub;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -52,19 +53,18 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         orderEvent.setOrder(savedOrder);
 
-        CartProto.GetCartRequest cartRequest = CartProto.GetCartRequest.newBuilder()
+        GetCartRequest cartRequest = GetCartRequest.newBuilder()
                 .setUserId(userId)
                 .build();
 
         List<OrderItem> orderItems = new ArrayList<>();
-        CartProto.GetCartResponse cartItems = cartService.getCartItems(cartRequest);
-        for(CartItem cartItem: cartItems.getCartItemList()) {
+        GetCartResponse cartProducts = cartService.getCartItems(cartRequest);
+        for(CartProduct cartProduct: cartProducts.getCartItemsList()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setPrice(cartItem.getPrice());
-            orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setProductId(fromString(cartItem.getProductId()));
-            orderItem.setVariantId(fromString(cartItem.getVariantId()));
+            orderItem.setQuantity(cartProduct.getQuantity());
+            orderItem.setProductId(fromString(cartProduct.getProductId()));
+            orderItem.setVariantId(fromString(cartProduct.getVariantId()));
 
             orderItems.add(orderItem);
         }
